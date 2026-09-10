@@ -21,6 +21,7 @@ local config = {}
 -- }
 
 config.color_scheme = "Kanagawa (Gogh)"
+config.default_prog = { "/usr/bin/zsh" }
 -- This is where you actually apply your config choices
 config.window_padding = {
 	top = 0,
