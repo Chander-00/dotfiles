@@ -16,8 +16,7 @@ The script is idempotent (safe to re-run) and:
 - Installs the IosevkaTerm Nerd Font
 - Installs oh-my-zsh + Powerlevel10k
 - Installs fzf-git.sh
-- Copies (not symlinks) `.zshrc`, `.p10k.zsh`, zellij config, nvim config, and the bat theme into place
-- Symlinks `.wezterm.lua` to `~/.wezterm.lua`
+- Symlinks `.zshrc`, `.p10k.zsh`, `.wezterm.lua`, the zellij config, the nvim config, and the bat theme into place — edit them in this repo and the changes apply immediately
 - Installs Node LTS via fnm
 - Sets zsh as the default shell
 

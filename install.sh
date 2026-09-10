@@ -44,13 +44,17 @@ echo "==> fzf-git.sh"
 mkdir -p ~/.local/share/fzf-git
 curl -fsSL -o ~/.local/share/fzf-git/fzf-git.sh https://raw.githubusercontent.com/junegunn/fzf-git.sh/main/fzf-git.sh
 
-echo "==> Configs (copied, not symlinked)"
-cp "$DOTFILES_DIR/ZshConfigs/.zshrc" ~/.zshrc
-cp "$DOTFILES_DIR/ZshConfigs/.p10k.zsh" ~/.p10k.zsh
-mkdir -p ~/.config/zellij ~/.config/nvim ~/.config/bat/themes
-cp -r "$DOTFILES_DIR"/ZellijConfigs/zellij/* ~/.config/zellij/
-cp -r "$DOTFILES_DIR"/NvimConfigs/nvim/* ~/.config/nvim/
-[ -d "$DOTFILES_DIR/BatConfigs/themes" ] && cp "$DOTFILES_DIR"/BatConfigs/themes/*.tmTheme ~/.config/bat/themes/ 2>/dev/null
+echo "==> Configs (symlinked to this repo)"
+rm -f ~/.zshrc && ln -s "$DOTFILES_DIR/ZshConfigs/.zshrc" ~/.zshrc
+rm -f ~/.p10k.zsh && ln -s "$DOTFILES_DIR/ZshConfigs/.p10k.zsh" ~/.p10k.zsh
+mkdir -p ~/.config ~/.config/bat/themes
+rm -rf ~/.config/zellij && ln -s "$DOTFILES_DIR/ZellijConfigs/zellij" ~/.config/zellij
+rm -rf ~/.config/nvim && ln -s "$DOTFILES_DIR/NvimConfigs/nvim" ~/.config/nvim
+if [ -d "$DOTFILES_DIR/BatConfigs/themes" ]; then
+	for theme in "$DOTFILES_DIR"/BatConfigs/themes/*.tmTheme; do
+		ln -sf "$theme" ~/.config/bat/themes/
+	done
+fi
 bat cache --build
 ln -sf "$DOTFILES_DIR/.wezterm.lua" ~/.wezterm.lua
 
