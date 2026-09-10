@@ -242,20 +242,20 @@ Leader key: **Space**. Press `<leader>` (space) and wait — LazyVim's which-key
 ## fzf-git
 Source: `~/.local/share/fzf-git/fzf-git.sh`, sourced in `~/.zshrc`. Fuzzy-pickers for git objects (works inside a git repo).
 
-**Inside zellij, use `Alt g` as the prefix** (`Ctrl g` is claimed by zellij itself and never reaches the shell — this is a real conflict, not mode-dependent). Outside zellij, the original `Ctrl g` prefix still works too (both are bound).
+**Inside zellij, use `Ctrl x` then `g` then a letter as the prefix.** `Ctrl g` (fzf-git's own default) is claimed by zellij itself and never reaches the shell. An `Alt g` prefix was tried first but is *also* unsafe: zellij binds several bare `Alt <letter>` combos (`f`, `h`, `j`, `k`, `l`, `n`, `o`, `i`, `y`, `+`, `-`, `=`, `[`, `]`), so holding Alt through the whole combo (e.g. `Alt g` then `Alt f` without releasing Alt in between) fires zellij's `Alt f` (toggle floating panes) instead. `Ctrl x` is untouched by zellij, so this is collision-proof regardless of how the keys are physically pressed. Outside zellij, the original `Ctrl g` prefix still works too (all three are bound).
 
-| Key (in zellij) | Key (plain terminal) | Action |
+| Key (recommended, any context) | Key (plain terminal only) | Action |
 |---|---|---|
-| `Alt g f` | `Ctrl g Ctrl f` / `Ctrl g f` | Fuzzy-pick files |
-| `Alt g b` | `Ctrl g Ctrl b` / `Ctrl g b` | Fuzzy-pick branches |
-| `Alt g t` | `Ctrl g Ctrl t` / `Ctrl g t` | Fuzzy-pick tags |
-| `Alt g r` | `Ctrl g Ctrl r` / `Ctrl g r` | Fuzzy-pick remotes |
-| `Alt g h` | `Ctrl g Ctrl h` / `Ctrl g h` | Fuzzy-pick commit hashes |
-| `Alt g s` | `Ctrl g Ctrl s` / `Ctrl g s` | Fuzzy-pick stashes |
-| `Alt g l` | `Ctrl g Ctrl l` / `Ctrl g l` | Fuzzy-pick reflogs |
-| `Alt g e` | `Ctrl g Ctrl e` / `Ctrl g e` | Fuzzy-pick each-ref |
-| `Alt g w` | `Ctrl g Ctrl w` / `Ctrl g w` | Fuzzy-pick worktrees |
-| `Alt g ?` | `Ctrl g ?` | Show this list of fzf-git bindings live |
+| `Ctrl x g f` | `Ctrl g Ctrl f` / `Ctrl g f` | Fuzzy-pick files |
+| `Ctrl x g b` | `Ctrl g Ctrl b` / `Ctrl g b` | Fuzzy-pick branches |
+| `Ctrl x g t` | `Ctrl g Ctrl t` / `Ctrl g t` | Fuzzy-pick tags |
+| `Ctrl x g r` | `Ctrl g Ctrl r` / `Ctrl g r` | Fuzzy-pick remotes |
+| `Ctrl x g h` | `Ctrl g Ctrl h` / `Ctrl g h` | Fuzzy-pick commit hashes |
+| `Ctrl x g s` | `Ctrl g Ctrl s` / `Ctrl g s` | Fuzzy-pick stashes |
+| `Ctrl x g l` | `Ctrl g Ctrl l` / `Ctrl g l` | Fuzzy-pick reflogs |
+| `Ctrl x g e` | `Ctrl g Ctrl e` / `Ctrl g e` | Fuzzy-pick each-ref |
+| `Ctrl x g w` | `Ctrl g Ctrl w` / `Ctrl g w` | Fuzzy-pick worktrees |
+| `Ctrl x g ?` | `Ctrl g ?` | Show this list of fzf-git bindings live |
 
 ---
 ## lazygit

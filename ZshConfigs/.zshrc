@@ -136,13 +136,16 @@ source <(fzf --zsh)
 source ~/.local/share/fzf-git/fzf-git.sh
 
 # fzf-git's default Ctrl-g prefix collides with zellij's own Ctrl-g (mode toggle),
-# which eats the keystroke before zsh ever sees it. Add an Alt-g alternate prefix
-# that reaches the same widgets, so fzf-git still works inside zellij.
+# which eats the keystroke before zsh ever sees it. An Alt-g prefix isn't safe either:
+# zellij also binds several bare Alt-<letter> combos (f, h, j, k, l, n, o, i, y, +, -, =,
+# [, ]), and holding Alt through the whole combo (Alt-g then Alt-f, say) triggers those
+# instead of reaching the shell. Ctrl-x is untouched by zellij, so use "Ctrl-x g <letter>"
+# instead — no held-modifier collision is possible.
 for _fg_pair in f:files b:branches t:tags r:remotes h:hashes s:stashes l:lreflogs e:each_ref w:worktrees '?:?list_bindings'; do
 	_fg_key="${_fg_pair%%:*}"
 	_fg_name="${_fg_pair#*:}"
 	for _fg_keymap in emacs vicmd viins; do
-		bindkey -M "$_fg_keymap" "\eg$_fg_key" "fzf-git-$_fg_name-widget"
+		bindkey -M "$_fg_keymap" "^xg$_fg_key" "fzf-git-$_fg_name-widget"
 	done
 done
 unset _fg_pair _fg_key _fg_name _fg_keymap
