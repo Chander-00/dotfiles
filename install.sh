@@ -45,7 +45,7 @@ if [ "$DISTRO" = arch ]; then
 		fish starship wezterm \
 		zellij fzf ripgrep bat fd eza git-delta lazygit zoxide fnm go neovim \
 		wl-clipboard xclip \
-		ugrep expac fastfetch \
+		ugrep expac fastfetch gum tree ranger \
 		ttf-iosevkaterm-nerd otf-monaspace-nerd ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols-mono
 else
 	echo "==> Base packages (apt)"

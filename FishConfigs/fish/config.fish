@@ -163,6 +163,9 @@ alias rip 'expac --timefmt="%Y-%m-%d %T" "%l\t%n %v" | sort | tail -200 | nl'
 alias start-docker="sudo systemctl start docker"
 alias stop-docker="sudo systemctl stop docker.socket docker.service"
 
+# Terminal file manager
+alias explore 'ranger'
+
 # VPS
 abbr -a myvps 'ssh -p 224 root@172.245.168.21'
 
