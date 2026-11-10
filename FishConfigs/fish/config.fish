@@ -1,100 +1,192 @@
-if status is-interactive
-    # Commands to run in interactive sessions can go here
-    # Install Fisher if not installed
-    if not functions -q fisher
-        curl -sL https://git.io/fisher | source
-        fisher install jorgebucaran/fisher
+## Set values
+# Hide welcome message & ensure we are reporting fish as shell
+set fish_greeting
+set VIRTUAL_ENV_DISABLE_PROMPT "1"
+set -x SHELL /usr/bin/fish
+
+# Use bat for man pages
+set -xU MANPAGER "sh -c 'col -bx | bat -l man -p'"
+set -xU MANROFFOPT "-c"
+
+# Hint to exit PKGBUILD review in Paru
+set -x PARU_PAGER "less -P \"Press 'q' to exit the PKGBUILD review.\""
+
+# Set settings for https://github.com/franciscolourenco/done
+set -U __done_min_cmd_duration 10000
+set -U __done_notification_urgency_level low
+
+## Environment setup
+# Apply .profile: use this to put fish compatible .profile stuff in
+if test -f ~/.fish_profile
+  source ~/.fish_profile
+end
+
+# Add ~/.local/bin to PATH
+if test -d ~/.local/bin
+    if not contains -- ~/.local/bin $PATH
+        set -p PATH ~/.local/bin
     end
-
 end
 
-if test (uname) = Darwin
-    # macOS
-    set BREW_BIN /opt/homebrew/bin/brew
-else
-    # Linux
-    set BREW_BIN /home/linuxbrew/.linuxbrew/bin/brew
-end
-
-set -x PATH $HOME/.volta/bin $HOME/.bun/bin $HOME/.nix-profile/bin /nix/var/nix/profiles/default/bin $PATH /usr/local/bin $HOME/.config $HOME/.cargo/bin /usr/local/lib/*
-
-eval ($BREW_BIN shellenv)
-
-if not set -q TMUX
-    tmux
-end
-
-#if not set -q ZELLIJ 
-#  zellij
-#end
-
-starship init fish | source
-zoxide init fish | source
-atuin init fish | source
-fzf --fish | source
-
-set -x PATH $HOME/.cargo/bin $PATH
-set -Ux CARAPACE_BRIDGES 'zsh,fish,bash,inshellisense'
-
-if not test -d ~/.config/fish/completions
-    mkdir -p ~/.config/fish/completions
-end
-
-if not test -f ~/.config/fish/completions/.initialized
-    if not test -d ~/.config/fish/completions
-        mkdir -p ~/.config/fish/completions
+# Add depot_tools to PATH
+if test -d ~/Applications/depot_tools
+    if not contains -- ~/Applications/depot_tools $PATH
+        set -p PATH ~/Applications/depot_tools
     end
-    carapace --list | awk '{print $1}' | xargs -I{} touch ~/.config/fish/completions/{}.fish
-    touch ~/.config/fish/completions/.initialized
 end
 
-carapace _carapace | source
+## Starship prompt
+if status --is-interactive
+   source ("/usr/bin/starship" init fish --print-full-init | psub)
+end
 
-set -g fish_greeting ""
+## Functions
+# Functions needed for !! and !$ https://github.com/oh-my-fish/plugin-bang-bang
+function __history_previous_command
+  switch (commandline -t)
+  case "!"
+    commandline -t $history[1]; commandline -f repaint
+  case "*"
+    commandline -i !
+  end
+end
 
-# Enable vi mode
-fish_vi_key_bindings
+function __history_previous_command_arguments
+  switch (commandline -t)
+  case "!"
+    commandline -t ""
+    commandline -f history-token-search-backward
+  case "*"
+    commandline -i '$'
+  end
+end
 
-## alias
-if test (uname) = Darwin
-    alias ls='ls --color=auto'
+if [ "$fish_key_bindings" = fish_vi_key_bindings ];
+  bind -Minsert ! __history_previous_command
+  bind -Minsert '$' __history_previous_command_arguments
 else
-    alias ls='gls --color=auto'
+  bind ! __history_previous_command
+  bind '$' __history_previous_command_arguments
 end
 
-alias fzfbat='fzf --preview="bat --theme=gruvbox-dark --color=always {}"'
-alias fzfnvim='nvim (fzf --preview="bat --theme=gruvbox-dark --color=always {}")'
+# Fish command history
+function history
+    builtin history --show-time='%F %T '
+end
 
-set -l foreground F3F6F9 normal
-set -l selection 263356 normal
-set -l comment 8394A3 brblack
-set -l red CB7C94 red
-set -l orange DEBA87 orange
-set -l yellow FFE066 yellow
-set -l green B7CC85 green
-set -l purple A3B5D6 purple
-set -l cyan 7AA89F cyan
-set -l pink FF8DD7 magenta
+function backup --argument filename
+    cp $filename $filename.bak
+end
 
-# Syntax Highlighting Colors
-set -g fish_color_normal $foreground
-set -g fish_color_command $cyan
-set -g fish_color_keyword $pink
-set -g fish_color_quote $yellow
-set -g fish_color_redirection $foreground
-set -g fish_color_end $orange
-set -g fish_color_error $red
-set -g fish_color_param $purple
-set -g fish_color_comment $comment
-set -g fish_color_selection --background=$selection
-set -g fish_color_search_match --background=$selection
-set -g fish_color_operator $green
-set -g fish_color_escape $pink
-set -g fish_color_autosuggestion $comment
+# Copy DIR1 DIR2
+function copy
+    set count (count $argv | tr -d \n)
+    if test "$count" = 2; and test -d "$argv[1]"
+	set from (echo $argv[1] | string trim --right --chars=/)
+	set to (echo $argv[2])
+        command cp -r $from $to
+    else
+        command cp $argv
+    end
+end
 
-# Completion Pager Colors
-set -g fish_pager_color_progress $comment
-set -g fish_pager_color_prefix $cyan
-set -g fish_pager_color_completion $foreground
-set -g fish_pager_color_description $comment
-clear
+# Cleanup local orphaned packages
+function cleanup
+    while pacman -Qdtq
+        sudo pacman -R (pacman -Qdtq)
+        if test "$status" -eq 1
+           break
+        end
+    end
+end
+
+## Useful aliases
+# Replace ls with eza
+alias ls 'eza -al --group-directories-first' # preferred listing
+alias lsz 'eza -al --total-size --group-directories-first' # include file size
+alias la 'eza -a --group-directories-first'  # all files and dirs
+alias ll 'eza -l --group-directories-first'  # long format
+alias lt 'eza -aT --group-directories-first' # tree listing
+alias l. 'eza -ald --group-directories-first .*' # show only dotfiles
+
+# Replace some more things with better alternatives
+abbr cat 'bat --style header,snip,changes'
+if not test -x /usr/bin/yay; and test -x /usr/bin/paru
+    alias yay 'paru'
+end
+
+# Common use
+alias .. 'cd ..'
+alias ... 'cd ../..'
+alias .... 'cd ../../..'
+alias ..... 'cd ../../../..'
+alias ...... 'cd ../../../../..'
+alias big 'expac -H M "%m\t%n" | sort -h | nl'     # Sort installed packages according to size in MB (expac must be installed)
+alias dir 'dir --color=auto'
+alias fixpacman 'sudo rm /var/lib/pacman/db.lck'
+alias gitpkg 'pacman -Q | grep -i "\-git" | wc -l' # List amount of -git packages
+alias grep 'ugrep --color=auto'
+alias egrep 'ugrep -E --color=auto'
+alias fgrep 'ugrep -F --color=auto'
+alias grubup 'sudo update-grub'
+alias hw 'hwinfo --short'                          # Hardware Info
+alias ip 'ip -color'
+alias psmem 'ps auxf | sort -nr -k 4'
+alias psmem10 'ps auxf | sort -nr -k 4 | head -10'
+alias rmpkg 'sudo pacman -Rdd'
+alias tarnow 'tar -acf '
+alias untar 'tar -zxvf '
+alias upd '/usr/bin/garuda-update'
+alias vdir 'vdir --color=auto'
+alias wget 'wget -c '
+
+# Get fastest mirrors
+alias mirror 'sudo reflector -f 30 -l 30 --number 10 --verbose --save /etc/pacman.d/mirrorlist'
+alias mirrora 'sudo reflector --latest 50 --number 20 --sort age --save /etc/pacman.d/mirrorlist'
+alias mirrord 'sudo reflector --latest 50 --number 20 --sort delay --save /etc/pacman.d/mirrorlist'
+alias mirrors 'sudo reflector --latest 50 --number 20 --sort score --save /etc/pacman.d/mirrorlist'
+
+# Help people new to Arch
+alias apt 'man pacman'
+alias apt-get 'man pacman'
+alias please 'sudo'
+alias tb 'nc termbin.com 9999'
+alias helpme 'echo "To print basic information about a command use tldr <command>"'
+alias pacdiff 'sudo -H DIFFPROG=meld pacdiff'
+
+# Get the error messages from journalctl
+alias jctl 'journalctl -p 3 -xb'
+
+# Recent installed packages
+alias rip 'expac --timefmt="%Y-%m-%d %T" "%l\t%n %v" | sort | tail -200 | nl'
+
+alias start-docker="sudo systemctl start docker"
+alias stop-docker="sudo systemctl stop docker.socket docker.service"
+
+## Run fastfetch if session is interactive
+if status --is-interactive && type -q fastfetch
+   fastfetch --config neofetch.jsonc
+end
+
+
+
+# Init zoxide
+if type -q zoxide
+    zoxide init fish --cmd cd | source
+end
+
+# Init node manager
+if type -q fnm
+    fnm env --use-on-cd | source
+end
+
+fish_add_path ~/go/bin
+
+# Zellij Auto-start (The very last thing)
+if status is-interactive; and type -q zellij
+    zellij setup --generate-completion fish | source
+    if not set -q ZELLIJ
+        eval (zellij setup --generate-auto-start fish | string collect)
+    end
+end
+
